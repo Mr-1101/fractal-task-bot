@@ -3,7 +3,6 @@
 
 """
 ربات مدیریت تسک‌های شخصی - نسخه نهایی
-با دکمه منوی اصلی داخل پیام‌ها (جایگزین منوی شیشه‌ای)
 """
 
 import os
@@ -30,7 +29,6 @@ from utils.helpers import (
 # ============================================
 
 def get_main_keyboard():
-    """کیبورد اصلی با دکمه منوی اصلی"""
     keyboard = [
         [InlineKeyboardButton("📝 ثبت تسک جدید", callback_data="new_task")],
         [InlineKeyboardButton("📊 وضعیت من", callback_data="view_status")],
@@ -38,7 +36,6 @@ def get_main_keyboard():
         [InlineKeyboardButton("📄 گزارش کامل", callback_data="my_report")],
         [InlineKeyboardButton("🔄 تغییر موضوع", callback_data="change_topic")],
         [InlineKeyboardButton("❓ راهنما", callback_data="help")],
-        [InlineKeyboardButton("📋 منوی اصلی", callback_data="show_menu")],
     ]
     return InlineKeyboardMarkup(keyboard)
 
@@ -87,7 +84,7 @@ logger = logging.getLogger(__name__)
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_id = update.effective_user.id
 
-    # تنظیم منوی شیشه‌ای (اگر کار کنه)
+    # تنظیم منوی شیشه‌ای
     try:
         await context.bot.set_chat_menu_button(
             chat_id=user_id,
@@ -321,50 +318,6 @@ async def handle_task_count(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 
 # ============================================
-# دکمه منوی اصلی
-# ============================================
-
-async def show_menu(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    """نمایش منوی اصلی با همه دستورات"""
-    query = update.callback_query
-    await query.answer()
-
-    user_id = update.effective_user.id
-    session = get_session()
-    user = session.query(User).filter_by(telegram_id=user_id, is_active=True).first()
-
-    menu_text = (
-        "📋 **منوی اصلی ربات**\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "🔹 **/start** - شروع و ثبت‌نام\n"
-        "🔹 **/newtask** - ثبت تسک جدید\n"
-        "🔹 **/status** - مشاهده وضعیت\n"
-        "🔹 **/mytasks** - لیست تسک‌ها\n"
-        "🔹 **/report** - گزارش کامل\n"
-        "🔹 **/help** - راهنما\n"
-        "🔹 **/cancel** - لغو عملیات\n"
-        "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-        "💡 از دکمه‌های زیر استفاده کنید."
-    )
-
-    if user:
-        progress_bar = get_progress_bar(user)
-        menu_text = (
-            f"📋 **منوی اصلی**\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            f"👤 {user.full_name}\n"
-            f"📚 {user.topic}\n"
-            f"📊 {user.remaining_tasks}/{user.total_tasks}\n"
-            f"📈 {progress_bar} {user.get_progress_percentage():.1f}%\n"
-            f"━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
-            "از دکمه‌های زیر استفاده کنید:"
-        )
-        session.close()
-
-    await query.edit_message_text(menu_text, reply_markup=get_main_keyboard(), parse_mode='Markdown')
-
-
-# ============================================
 # ثبت تسک جدید
 # ============================================
 
@@ -483,6 +436,7 @@ async def handle_voice(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user.last_activity = datetime.now()
     session.commit()
 
+    # به‌روزرسانی پیشرفت
     progress = session.query(UserProgress).filter_by(user_id=user.id).first()
     if progress:
         progress.total_submissions += 1
@@ -947,7 +901,7 @@ def main():
 
     application = Application.builder().token(Config.TELEGRAM_TOKEN).build()
 
-    # تنظیم منوی شیشه‌ای (اگر کار کنه)
+    # تنظیم منوی شیشه‌ای
     try:
         application.bot.set_chat_menu_button(menu_button=MenuButtonCommands())
         print("✅ منوی شیشه‌ای تنظیم شد!")
@@ -1026,9 +980,6 @@ def main():
     application.add_handler(CallbackQueryHandler(handle_change_topic, pattern='^(topic_\\d+|add_new_topic|cancel)$'))
     application.add_handler(CallbackQueryHandler(handle_pagination, pattern='^(next_page|prev_page)$'))
 
-    # دکمه منوی اصلی
-    application.add_handler(CallbackQueryHandler(show_menu, pattern='^show_menu$'))
-
     # دستورات
     application.add_handler(CommandHandler('status', status))
     application.add_handler(CommandHandler('mytasks', my_tasks))
@@ -1038,7 +989,6 @@ def main():
 
     print("🤖 ربات در حال اجرا است...")
     print(f"📢 کانال: {Config.CHANNEL_ID}")
-    print("✅ دکمه 📋 منوی اصلی در پیام‌ها فعال است")
     application.run_polling(allowed_updates=Update.ALL_TYPES)
 
 

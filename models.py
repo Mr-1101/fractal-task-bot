@@ -14,7 +14,7 @@ class User(Base):
     telegram_id = Column(Integer, unique=True, nullable=False, index=True)
     username = Column(String(100))
     full_name = Column(String(200), nullable=False)
-    phone = Column(String(20), default='-')  # اختیاری
+    phone = Column(String(20), nullable=False)
     email = Column(String(100), nullable=False)
     topic = Column(String(100), nullable=False)
     topic_key = Column(String(10))
