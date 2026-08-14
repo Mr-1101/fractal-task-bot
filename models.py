@@ -55,6 +55,7 @@ class UserProgress(Base):
     last_submission_date = Column(DateTime)
 
 
+# ایجاد دیتابیس
 engine = create_engine(Config.DATABASE_URL, echo=False)
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)

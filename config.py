@@ -43,6 +43,7 @@ class Config:
             '4': {'name': 'پیدا کردن داجی', 'tasks_needed': 1000, 'emoji': '📖', 'is_active': True},
             '5': {'name': 'پیدا کردن ATR', 'tasks_needed': 1000, 'emoji': '📖', 'is_active': True},
             '6': {'name': 'تمرین کامل فرکتال', 'tasks_needed': 1000, 'emoji': '💡', 'is_active': True},
+            '7': {'name': 'پوزیشن ها', 'tasks_needed': 1000, 'emoji': '$$', 'is_active': True},
         }
 
 
